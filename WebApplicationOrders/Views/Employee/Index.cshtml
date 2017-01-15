@@ -1,0 +1,128 @@
+﻿@model WebApplicationOrders.Models.EmployeeView
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Index</h2>
+@using (Html.BeginForm("Insert", "Employee", FormMethod.Post))
+{
+    @Html.ValidationSummary(true)
+
+    <fieldset>
+        <legend>EmployeeData</legend>
+
+        <div class="editor-label">
+            @*@using (Html.BeginForm())*@
+            @Html.Label("Country")<br/>;
+        </div>
+
+        <div>
+            @Html.DropDownListFor(model => model.Country, new SelectList(Model.Countries, "Value", "Text"), new { style = "width:150px", @id = "Country"})
+            @*@Html.DropDownList("Country", ViewBag.Country as SelectList, "--Please Select a Country--", new { style = "width:150px", @id="Country"})*@
+        </div>
+
+        <div>
+        <div class="editor-label">
+            <br />
+            @Html.Label("State")<br />
+        </div> 
+        <div>
+            @Html.DropDownListFor(model => model.State, new SelectList(Model.States, "Value", "Text"), new { style = "width:150px", @id = "State"})
+            @*@Html.DropDownList("State", new SelectList(string.Empty, "Value", "Text"), "-- Please select a State --",
+                        new { style = "width:150px", @class = "dropdown1" })*@
+        </div>
+
+        <div class="editor-label">
+
+            <br />
+            @Html.Label("City")<br />
+        </div>
+        <div>
+            @Html.DropDownListFor(model => model.City, new SelectList(Model.Cities, "Value", "Text"), new { style = "width:150px", @id = "City"})
+            @*@Html.DropDownList("City", new SelectList(string.Empty, "Value", "Text"), "-- Please select a city --",
+                        new { style = "width:150px", @class = "dropdown2", @id = "City" })*@
+        </div>
+
+        <p>
+            @*<input type="button" onclick="ddlInsert()" value="Submit" />  *@
+            <input type="submit" name="Get" value="Submit" />
+        </p>
+    </fieldset>
+    <script src="~/Scripts/jquery-1.7.1.js"></script>
+<script src="~/Scripts/jquery-1.7.1.min.js"></script>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        // this is Country Dropdown Selectedchange event 
+        $("#Country").change(function () {
+            $("#State").empty();
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("Getstate")', // here we are Calling json method
+                dataType: 'json',
+                data: { id: $("#Country").val() },
+                // Get Selected Country ID. 
+
+                success: function (states) {
+                    $.each(states, function (i, state) {
+                        $("#State").append('<option value="' + state.Value + '">' +
+                             state.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert(' states retrieving fail.' + ex);
+                }
+            });
+            return false;
+        })
+
+        $("#State").change(function () {
+            $("#City").empty();
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("GetCity")', // here we are Calling json method
+                dataType: 'json',
+                data: { id: $("#State").val() },
+                // Get Selected Country ID. 
+
+                success: function (cities) {
+                    $.each(cities, function (i, city) {
+                        $("#City").append('<option value="' + city.Value + '">' +
+                             city.Text + '</option>');
+                    });
+                },
+                error: function (ex) {
+                    alert(' city retrieving fail.' + ex);
+                }
+            });
+            return false;
+        })
+    });
+</script>
+    
+<script type="text/javascript">
+    function ddlInsert() {
+        var ctr = document.getElementById('Country');
+        var Country = ctr.options[ctr.selectedIndex].text;
+
+        var stt = document.getElementById('State');
+        var State = stt.options[stt.selectedIndex].text;
+
+        var ct = document.getElementById('City');
+        var City = ct.options[ct.selectedIndex].text;
+
+        $.ajax({
+            url: '@Url.Action("Insert", "Employee")',
+            data: { Country: Country, State: State, City: City },
+            type: 'POST',
+            dataType: 'json',
+            success: function (data) {
+            }
+        });
+    }
+
+ </script>
+}
